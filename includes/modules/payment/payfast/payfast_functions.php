@@ -9,8 +9,8 @@
  */
 
 // Posting URLs
-define( 'MODULE_PAYMENT_PAYFAST_SERVER_LIVE', 'www.payfast.local' );
-define( 'MODULE_PAYMENT_PAYFAST_SERVER_TEST', 'sandbox.payfast.local' );
+define( 'MODULE_PAYMENT_PAYFAST_SERVER_LIVE', 'www.payfast.co.za' );
+define( 'MODULE_PAYMENT_PAYFAST_SERVER_TEST', 'sandbox.payfast.co.za' );
 
 // Database tables
 define( 'TABLE_PAYFAST', DB_PREFIX . 'payfast' );

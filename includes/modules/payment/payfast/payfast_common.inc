@@ -135,7 +135,7 @@ function pfValidSignature( $pfData = null, &$pfParamString = null )
     // Dump the submitted variables and calculate security signature
     foreach( $pfData as $key => $val )
     {
-    	if( $key != 'signature' )
+        if( $key != 'signature' )
         {
             $pfParamString .= $key .'='. urlencode( $val ) .'&';
         }
@@ -209,7 +209,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
          
         // Construct Header
         $header = "POST /eng/query/validate HTTP/1.0\r\n";
-       	$header .= "Host: ". $pfHost ."\r\n";
+        $header .= "Host: ". $pfHost ."\r\n";
         $header .= "User-Agent: ". PF_USER_AGENT ."\r\n";
         $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
         $header .= "Content-Length: " . strlen( $pfParamString ) . "\r\n\r\n";
@@ -264,7 +264,7 @@ function pfValidIP( $sourceIP )
 {
     // Variable initialization
     $validHosts = array(
-        'www.payfast.local',
+        'www.payfast.co.za',
         'sandbox.payfast.co.za',
         'w1w.payfast.co.za',
         'w2w.payfast.co.za',
