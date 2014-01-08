@@ -146,7 +146,7 @@ if( !$pfError )
 
             $sql =
                 "SELECT *
-                FROM `zw4t_payfast_session`
+                FROM `".TABLE_PAYFAST_SESSION."`
                 WHERE `session_id` = '". $zcSessID ."'";
             $storedSession = $db->Execute( $sql );
 
@@ -225,14 +225,14 @@ pflog( __FILE__ . ' line ' . __LINE__ );
             // Create PayFast order
             pflog( 'Creating PayFast order' );
             $sqlArray = pf_createOrderArray( $pfData, $zcOrderId, $ts );
-            zen_db_perform( 'zw4t_payfast', $sqlArray );
+            zen_db_perform( TABLE_PAYFAST, $sqlArray );
 
             // Create PayFast history record
             pflog( 'Creating PayFast payment status history record' );
             $pfOrderId = $db->Insert_ID();
 
             $sqlArray = pf_createOrderHistoryArray( $pfData, $pfOrderId, $ts );
-            zen_db_perform( 'zw4t_payfast_payment_status_history', $sqlArray );
+            zen_db_perform( TABLE_PAYFAST_PAYMENT_STATUS_HISTORY, $sqlArray );
 
             // Update order status (if required)
             $newStatus = MODULE_PAYMENT_PAYFAST_ORDER_STATUS_ID;
@@ -275,7 +275,7 @@ pflog( __FILE__ . ' line ' . __LINE__ );
 
             // Deleting stored session information
             $sql =
-                "DELETE FROM `zw4t_payfast_session`
+                "DELETE FROM `".TABLE_PAYFAST_SESSION."`
                 WHERE `session_id` = '". $zcSessID ."'";
             $db->Execute( $sql );
 
@@ -307,7 +307,7 @@ pflog( __FILE__ . ' line ' . __LINE__ );
         case 'cleared':
 
             $sqlArray = pf_createOrderHistoryArray( $pfData, $pfOrderId, $ts );
-            zen_db_perform( 'zw4t_payfast_payment_status_history', $sqlArray );
+            zen_db_perform( TABLE_PAYFAST_PAYMENT_STATUS_HISTORY, $sqlArray );
 
             $newStatus = MODULE_PAYMENT_PAYFAST_ORDER_STATUS_ID;
             break;
@@ -323,7 +323,7 @@ pflog( __FILE__ . ' line ' . __LINE__ );
         case 'update':
 
             $sqlArray = pf_createOrderHistoryArray( $pfData, $pfOrderId, $ts );
-            zen_db_perform( 'zw4t_payfast_payment_status_history', $sqlArray );
+            zen_db_perform( TABLE_PAYFAST_PAYMENT_STATUS_HISTORY, $sqlArray );
 
             break;
 
@@ -336,7 +336,7 @@ pflog( __FILE__ . ' line ' . __LINE__ );
 
             $comments = 'Payment failed (PayFast id = '. $pfData['pf_payment_id'] .')';
             $sqlArray = pf_createOrderHistoryArray( $pfData, $pfOrderId, $ts );
-            zen_db_perform( 'zw4t_payfast_payment_status_history', $sqlArray );
+            zen_db_perform( TABLE_PAYFAST_PAYMENT_STATUS_HISTORY, $sqlArray );
 
             $newStatus = MODULE_PAYMENT_PAYFAST_PREPARE_ORDER_STATUS_ID;
 
