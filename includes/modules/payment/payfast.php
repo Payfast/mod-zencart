@@ -311,6 +311,8 @@ class payfast extends base
                 '". date( PF_FORMAT_DATETIME_DB, $tsExpire ) ."' )";
         $db->Execute( $sql );
 
+        // remove amp; before POSTing to PayFast
+        $returnUrl = str_replace( "amp;", "", $returnUrl );
 
         //// Set the data
         $mPaymentId = pf_createUUID();
@@ -327,22 +329,40 @@ class payfast extends base
             'name_last' => replace_accents( $order->customer['lastname'] ),
             'email_address' => $order->customer['email_address'],
 
+            'm_payment_id' => $mPaymentId,
+            'amount' => number_format( $this->transaction_amount, $currencyDecPlaces, '.', '' ),
+
             // Item Details
             'item_name' => MODULE_PAYMENT_PAYFAST_PURCHASE_DESCRIPTION_TITLE . $mPaymentId,
             'item_description' => $description,
-            'amount' => number_format( $this->transaction_amount, $currencyDecPlaces, '.', '' ),
-            'm_payment_id' => $mPaymentId,
-            'currency_code' => $currency,
+
             'custom_str1' => zen_session_name() .'='. zen_session_id(),
-            
-            // Other details
-            'user_agent' => PF_USER_AGENT,
             );
+
+        $pfOutput = '';
+        // Create output string
+        foreach( $data as $name => $value )
+        {
+            $pfOutput .= $name . '=' . urlencode(trim($value)) . '&';
+        }
+
+        $passPhrase = MODULE_PAYMENT_PAYFAST_PASSPHRASE;
+        if( empty( $passPhrase ) || MODULE_PAYMENT_PAYFAST_SERVER != 'Live' )
+        {
+            $pfOutput = substr( $pfOutput, 0, -1 );
+        }
+        else
+        {
+            $pfOutput = $pfOutput."passphrase=".urlencode( $passPhrase );
+        }
+
+        $data['signature'] = md5( $pfOutput );
 
         pflog( "Data to send:\n". print_r( $data, true ) );
 
 
         //// Check the data and create the process button array
+
         foreach( $data as $name => $value )
         {
             // Remove quotation marks
@@ -352,7 +372,6 @@ class payfast extends base
         }
 
         $processButtonString = implode( "\n", $buttonArray ) ."\n";
-
 
         return( $processButtonString );
     }
@@ -517,6 +536,10 @@ class payfast extends base
         $db->Execute(
             "INSERT INTO ". TABLE_CONFIGURATION ."( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added )
             VALUES( 'Merchant Key', 'MODULE_PAYMENT_PAYFAST_MERCHANT_KEY', '46f0cd694581a', 'Your Merchant Key from PayFast<br><span style=\"font-size: 0.9em; color: green;\">(Click <a href=\"http://www.payfast.co.za/acc/integration\" target=\"_blank\">here</a> to get yours. This is initially set to a test value for testing purposes.)</span>', '6', '0', now() )" );
+        // MODULE_PAYMENT_PAYFAST_PASSPHRASE
+        $db->Execute(
+            "INSERT INTO ". TABLE_CONFIGURATION ."( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added )
+            VALUES( 'Passphrase', 'MODULE_PAYMENT_PAYFAST_PASSPHRASE', '', 'Only enter a Passphrase if you have one set on your PayFast account', '6', '0', now() )" );
         // MODULE_PAYMENT_PAYFAST_SERVER (Default = Test)
         $db->Execute(
             "INSERT INTO ". TABLE_CONFIGURATION ."( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added )
@@ -705,6 +728,7 @@ class payfast extends base
             'MODULE_PAYMENT_PAYFAST_STATUS',
             'MODULE_PAYMENT_PAYFAST_MERCHANT_ID',
             'MODULE_PAYMENT_PAYFAST_MERCHANT_KEY',
+            'MODULE_PAYMENT_PAYFAST_PASSPHRASE',
             'MODULE_PAYMENT_PAYFAST_SERVER',
             'MODULE_PAYMENT_PAYFAST_SORT_ORDER',
             'MODULE_PAYMENT_PAYFAST_ZONE',
