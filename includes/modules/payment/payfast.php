@@ -357,6 +357,7 @@ class payfast extends base
         }
 
         $data['signature'] = md5( $pfOutput );
+        $data['user_agent'] = 'ZenCart 1.x';
 
         pflog( "Data to send:\n". print_r( $data, true ) );
 
