@@ -1,5 +1,5 @@
-PayFast ZenCart Module v1.11 for Zen Cart 1.3.9d
-------------------------------------------------
+PayFast ZenCart Module v1.11 for Zen Cart 1.3.9 - 1.5
+-----------------------------------------------------
 Copyright © 2009-2013 PayFast (Pty) Ltd
 
 
