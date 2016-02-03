@@ -288,6 +288,7 @@ class payfast extends base
         $description .= 'Shipping = '. number_format( $order->info['shipping_cost'], $currencyDecPlaces ) .'; ';
         $description .= 'Total= '. number_format( $this->transaction_amount, $currencyDecPlaces ) .'; ';
 
+
         //// Save the session (and remove expired sessions)
         pf_removeExpiredSessions();
         $tsExpire = strtotime( '+'. PF_SESSION_LIFE .' days' );
@@ -334,7 +335,7 @@ class payfast extends base
 
             // Item Details
             'item_name' => MODULE_PAYMENT_PAYFAST_PURCHASE_DESCRIPTION_TITLE . $mPaymentId,
-            'item_description' => $description,
+            'item_description' => substr( $description, 0, 254 );
 
             'custom_str1' => zen_session_name() .'='. zen_session_id(),
             );
