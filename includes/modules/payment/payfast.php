@@ -335,7 +335,7 @@ class payfast extends base
 
             // Item Details
             'item_name' => MODULE_PAYMENT_PAYFAST_PURCHASE_DESCRIPTION_TITLE . $mPaymentId,
-            'item_description' => substr( $description, 0, 254 );
+            'item_description' => substr( $description, 0, 254 ),
 
             'custom_str1' => zen_session_name() .'='. zen_session_id(),
             );
