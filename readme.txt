@@ -17,11 +17,26 @@ License for more details.
 Please see http://www.opensource.org/licenses/ for a copy of the GNU Lesser
 General Public License.
 
+INTEGRATION:
+1. Unzip the module to a temporary location on your computer
+2. Copy and paste the files into your Zen Cart installation as they were extracted
+- This should NOT overwrite any existing files or folders and merely supplement them with the PayFast files
+- This is however, dependent on the FTP program you use
+- If you are concerned about this, rather copy the individual files across as per instructions below
+3. Login to the Zen Cart admin console
+4. Using the main menu, navigate to Modules ? Payment
+5. Select the “PayFast” payment method by clicking on it
+6. Click the “Install” button on the right hand pane
+7. Change the value for “Enable PayFast” to “True”
+8. Scroll down to the bottom of the right hand pane and press the “Update” button
+9. The module is now operating in “test mode” and is ready to be tested with the Sandbox. To test with the sandbox, use the following login credentials when redirected to the PayFast site:
+- Username: sbtu01@payfast.co.za
+- Password: clientpass
 
 ******************************************************************************
 *                                                                            *
 *    Please see the URL below for all information concerning this module:    *
 *                                                                            *
-*                  http://www.payfast.co.za/developers/zen_cart              *
+*                  https://www.payfast.co.za/shopping-carts/zen-cart/        *
 *                                                                            *
 ******************************************************************************
