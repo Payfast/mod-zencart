@@ -4,8 +4,9 @@
  *
  * Lanugage defines for PayFast payment module
  *
- * @copyright Copyright 2009-2010 PayFast (Pty) Ltd
- * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+ * Copyright (c) 2008 PayFast (Pty) Ltd
+ * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
+ * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
 define( 'MODULE_PAYMENT_PAYFAST_TEXT_ADMIN_TITLE', 'PayFast' );
