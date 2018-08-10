@@ -41,6 +41,7 @@ $pfHost = ( strcasecmp( MODULE_PAYMENT_PAYFAST_SERVER, 'live' ) == 0 ) ?
     MODULE_PAYMENT_PAYFAST_SERVER_LIVE : MODULE_PAYMENT_PAYFAST_SERVER_TEST;
 $pfOrderId = '';
 $pfParamString = '';
+$pfPassphrase = MODULE_PAYMENT_PAYFAST_PASSPHRASE;
 $pfDebugEmail = defined( 'MODULE_PAYMENT_PAYFAST_DEBUG_EMAIL_ADDRESS')
     ? MODULE_PAYMENT_PAYFAST_DEBUG_EMAIL_ADDRESS : STORE_OWNER_EMAIL_ADDRESS;
 
@@ -76,7 +77,7 @@ if( !$pfError )
     pflog( 'Verify security signature' );
 
     // If signature different, log for debugging
-    if( !pfValidSignature( $pfData, $pfParamString ) )
+    if( !pfValidSignature( $pfData, $pfParamString, $pfPassphrase  ) )
     {
         $pfError = true;
         $pfErrMsg = PF_ERR_INVALID_SIGNATURE;
