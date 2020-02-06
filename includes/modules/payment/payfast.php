@@ -314,6 +314,7 @@ class payfast extends base
         $db->Execute( $sql );
 
         // remove amp; before POSTing to PayFast
+        $cancelUrl = str_replace( "amp;", "", $cancelUrl );
         $returnUrl = str_replace( "amp;", "", $returnUrl );
 
         //// Set the data
@@ -337,8 +338,8 @@ class payfast extends base
             // Item Details
             'item_name' => MODULE_PAYMENT_PAYFAST_PURCHASE_DESCRIPTION_TITLE . $mPaymentId,
             'item_description' => substr( $description, 0, 254 ),
-
-            'custom_str1' => zen_session_name() .'='. zen_session_id(),
+            'custom_str1' => PF_MODULE_NAME . '_' . PF_MODULE_VER,
+            'custom_str2' => zen_session_name() .'='. zen_session_id(),
             );
 
         $pfOutput = '';
@@ -359,8 +360,6 @@ class payfast extends base
         }
 
         $data['signature'] = md5( $pfOutput );
-        $data['user_agent'] = 'ZenCart 1.x';
-
         pflog( "Data to send:\n". print_r( $data, true ) );
 
 
@@ -378,8 +377,7 @@ class payfast extends base
 
         return( $processButtonString );
     }
-    // }}}
-    // {{{ before_process()
+
     /**
      * before_process
      *

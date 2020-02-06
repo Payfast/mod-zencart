@@ -11,25 +11,18 @@
 
 define( 'MODULE_PAYMENT_PAYFAST_TEXT_ADMIN_TITLE', 'PayFast' );
 define( 'MODULE_PAYMENT_PAYFAST_TEXT_CATALOG_TITLE', 'PayFast' );
+define( 'MODULE_PAYMENT_PAYFAST_BUTTON_IMG', DIR_WS_IMAGES .'payfast/PayFast Logo Colour.png' );
 
 if( IS_ADMIN_FLAG === true )
     define( 'MODULE_PAYMENT_PAYFAST_TEXT_DESCRIPTION',
-        '<strong>PayFast</strong><br />'.
-        '<a href="https://www.payfast.co.za/acc/account" target="_blank">'.
-        'Manage your PayFast account.</a><br /><br />'.
-        '<font color="green">Configuration Instructions:</font><br />'.
-        '<ol style="padding-left: 20px;">'.
-        '<li><a href="http://www.payfast.co.za/user/register" target="_blank">Register for a PayFast account.</a></li>'.
-        '<li>Click "install" above to enable PayFast support and "edit" to tell Zen Cart your PayFast settings</li>'.
-        '</ol>'.
-        '<font color="green"><hr /><strong>Requirements:</strong></font><br /><hr />'.
-        '*<strong>*<strong>Port 80</strong> is used for bidirectional communication with the gateway, so must be open on your host\'s router/firewall<br />'.
-        '*<strong>PHP allow_url_fopen</strong> must be enabled<br />'.
-        '*<strong>Settings</strong> must be configured as described above.' );
+        '<img src="../'. MODULE_PAYMENT_PAYFAST_BUTTON_IMG .'" style="height:5rem;"> <br>'.
+        '<br />'.
+        'Manage your '.
+        '<a href="https://www.payfast.co.za/acc/account" target="_blank">PayFast account</a> or '.
+        '<a href="http://www.payfast.co.za/user/register" target="_blank"> register</a> for a PayFast account');
 else
     define( 'MODULE_PAYMENT_PAYFAST_TEXT_DESCRIPTION', '<strong>PayFast</strong>');
 
-define( 'MODULE_PAYMENT_PAYFAST_BUTTON_IMG', DIR_WS_IMAGES .'payfast/logo_small.png' );
 define( 'MODULE_PAYMENT_PAYFAST_BUTTON_ALT', 'Checkout with PayFast' );
 define( 'MODULE_PAYMENT_PAYFAST_ACCEPTANCE_MARK_TEXT', '' );
 

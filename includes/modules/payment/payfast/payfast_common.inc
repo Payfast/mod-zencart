@@ -8,11 +8,10 @@
  * @author Jonathan Smit
  */
 //// Create user agent string
-// User agent constituents (for cURL)
 define( 'PF_SOFTWARE_NAME', 'ZenCart' );
 define( 'PF_SOFTWARE_VER', PROJECT_VERSION_MAJOR . '.' . PROJECT_VERSION_MINOR );
-define( 'PF_MODULE_NAME', 'PayFast-ZenCart_1_3' );
-define( 'PF_MODULE_VER', '1.10' );
+define( 'PF_MODULE_NAME', 'PayFast_ZenCart' );
+define( 'PF_MODULE_VER', '1.12' );
 
 // Features
 // - PHP
@@ -26,11 +25,9 @@ if( in_array( 'curl', get_loaded_extensions() ) )
     $pfFeatures .= ' curl '. $pfVersion['version'] .';';
 }
 else
+{
     $pfFeatures .= ' nocurl;';
-
-// Create user agrent
-define( 'PF_USER_AGENT', PF_SOFTWARE_NAME .'/'. PF_SOFTWARE_VER .' ('. trim( $pfFeatures ) .') '. PF_MODULE_NAME .'/'. PF_MODULE_VER );
-
+}
 // General Defines
 define( 'PF_TIMEOUT', 15 );
 define( 'PF_EPSILON', 0.01 );
@@ -62,7 +59,7 @@ define( 'PF_MSG_PENDING',
     ' Transaction Notification when the payment status changes to'.
     ' "Completed", or "Failed"' );
 
-// {{{ pfLog
+
 /**
  * pflog
  *
@@ -103,8 +100,7 @@ function pflog( $msg = '', $close = false )
         }
     }
 }
-// }}}
-// {{{ pfGetData
+
 /**
  * pfGetData
  *  
@@ -125,8 +121,7 @@ function pfGetData()
     else
         return( $pfData );
 }
-// }}}
-// {{{ pfValidSignature
+
 /**
  * pfValidSignature
  * 
@@ -167,8 +162,7 @@ function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase
 
     return( $result );
 }
-// }}}
-// {{{ pfValidData
+
 /**
  * pfValidData
  *
@@ -193,7 +187,6 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
     
         // Set cURL options - Use curl_setopt for freater PHP compatibility
         // Base settings
-        curl_setopt( $ch, CURLOPT_USERAGENT, PF_USER_AGENT );  // Set user agent
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );      // Return output as string rather than outputting it
         curl_setopt( $ch, CURLOPT_HEADER, false );             // Don't include header in output
         curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
@@ -222,7 +215,6 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
         // Construct Header
         $header = "POST /eng/query/validate HTTP/1.0\r\n";
         $header .= "Host: ". $pfHost ."\r\n";
-        $header .= "User-Agent: ". PF_USER_AGENT ."\r\n";
         $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
         $header .= "Content-Length: " . strlen( $pfParamString ) . "\r\n\r\n";
  
@@ -264,46 +256,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
     else
         return( false );
 }
-// }}}
-// {{{ pfValidIP
-/**
- * pfValidIP
- *
- * @author Jonathan Smit
- * @param $sourceIP String Source IP address 
- */
-function pfValidIP( $sourceIP )
-{
-    // Variable initialization
-    $validHosts = array(
-        'www.payfast.co.za',
-        'sandbox.payfast.co.za',
-        'w1w.payfast.co.za',
-        'w2w.payfast.co.za',
-        );
 
-    $validIps = array();
-
-    foreach( $validHosts as $pfHostname )
-    {
-        $ips = gethostbynamel( $pfHostname );
-
-        if( $ips !== false )
-            $validIps = array_merge( $validIps, $ips );
-    }
-
-    // Remove duplicates
-    $validIps = array_unique( $validIps );
-
-    pflog( "Valid IPs:\n". print_r( $validIps, true ) );
-
-    if( in_array( $sourceIP, $validIps ) )
-        return( true );
-    else
-        return( false );
-}
-// }}}
-// {{{ pfAmountsEqual
 /**
  * pfAmountsEqual
  * 

@@ -84,18 +84,6 @@ if( !$pfError )
     }
 }
 
-//// Verify source IP (If not in debug mode)
-if( !$pfError && !PF_DEBUG )
-{
-    pflog( 'Verify source IP' );
-
-    if( !pfValidIP( $_SERVER['REMOTE_ADDR'] ) )
-    {
-        $pfError = true;
-        $pfErrMsg = PF_ERR_BAD_SOURCE_IP;
-    }
-}
-
 //// Verify data received
 if( !$pfError )
 {
@@ -142,7 +130,7 @@ if( !$pfError )
             pflog( 'Retrieving saved session' );
 
             // Get the Zen session name and ID from PayFast data
-            list( $zcSessName, $zcSessID ) = explode( '=', $pfData['custom_str1'] );
+            list( $zcSessName, $zcSessID ) = explode( '=', $pfData['custom_str2'] );
 
             pflog( 'Session Name = '. $zcSessName .', Session ID = '. $zcSessID );
 
