@@ -19,7 +19,7 @@ if (defined('PROJECT_VERSION_MAJOR')) {
     define('PF_SOFTWARE_VER', PROJECT_VERSION_MAJOR . '.' . PROJECT_VERSION_MINOR);
 }
 define('PF_MODULE_NAME', 'PayFast_ZenCart');
-define('PF_MODULE_VER', '1.1.13');
+define('PF_MODULE_VER', '1.1.3');
 
 // Features
 // - PHP
