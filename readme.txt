@@ -1,12 +1,12 @@
-PayFast ZenCart Module v1.12 for Zen Cart 1.3.9 - 1.5
+PayFast ZenCart Module v1.1.13 for Zen Cart 1.5.8
 -----------------------------------------------------
-Copyright (c) 2008 PayFast (Pty) Ltd
+Copyright (c) 2023 PayFast (Pty) Ltd
 You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
 Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
 
 INTEGRATION:
 1. Unzip the module to a temporary location on your computer
-2. Copy and paste the files into your Zen Cart installation as they were extracted
+2. Copy and paste the files into your Zen Cart installation as they were extracted. Take special note to upload the contents of the extracted admin folder to the folder matching your ZenCart admin url.
 - This should NOT overwrite any existing files or folders and merely supplement them with the PayFast files
 - This is however, dependent on the FTP program you use
 - If you are concerned about this, rather copy the individual files across as per instructions below
