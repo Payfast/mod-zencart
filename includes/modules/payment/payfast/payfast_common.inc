@@ -19,7 +19,7 @@ if (defined('PROJECT_VERSION_MAJOR')) {
     define('PF_SOFTWARE_VER', PROJECT_VERSION_MAJOR . '.' . PROJECT_VERSION_MINOR);
 }
 define('PF_MODULE_NAME', 'PayFast_ZenCart');
-define('PF_MODULE_VER', '1.1.3');
+define('PF_MODULE_VER', '1.1.4');
 
 // Features
 // - PHP
@@ -121,7 +121,7 @@ function pfGetData(): bool|array
     // Posted variables from ITN
     $pfData = $_POST;
     if (empty($_POST)) {
-        $pfData = file_get_contents('php://input');
+        $pfData = json_decode(file_get_contents('php://input'), true);
     }
 
     // Strip any slashes in data

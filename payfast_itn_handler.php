@@ -20,6 +20,7 @@ $loaderPrefix      = 'payfast_itn';
 
 $show_all_errors = false;
 require_once('includes/configure.php');
+require_once('includes/defined_paths.php');
 require_once('includes/modules/payment/payfast/payfast_common.inc');
 require_once('includes/modules/payment/payfast/payfast_functions.php');
 require_once('includes/application_top.php');
@@ -47,8 +48,14 @@ const SITE_LITERAL                       = "Site: ";
 const ORDER_LITERAL                      = "Order ID: ";
 const TRANSACTION_LITERAL                = "PayFast Transaction ID: ";
 const PAYMENT_LITERAL                    = "PayFast Payment Status: ";
-const MODULE_PAYMENT_PAYFAST_SERVER_LIVE = "payfast.co.za";
-const MODULE_PAYMENT_PAYFAST_SERVER_TEST = "sandbox.payfast.co.za";
+
+if (!defined('MODULE_PAYMENT_PAYFAST_SERVER_LIVE')) {
+    define("MODULE_PAYMENT_PAYFAST_SERVER_LIVE", "payfast.co.za");
+}
+
+if (!defined('MODULE_PAYMENT_PAYFAST_SERVER_TEST')) {
+    define("MODULE_PAYMENT_PAYFAST_SERVER_TEST", "sandbox.payfast.co.za");
+}
 
 $pfError       = false;
 $pfErrMsg      = '';
@@ -81,7 +88,7 @@ if (!$pfError) {
     // Posted variables from ITN
     $pfData = pfGetData();
 
-    pflog('PayFast Data: ' . print_r($pfData, true));
+    pflog('PayFast Data: ' . json_encode($pfData));
 
     if ($pfData === false) {
         $pfError  = true;
@@ -119,6 +126,9 @@ if (!$pfError) {
     $pfOrderId = null;
     $zcOrderId = null;
     $txnType   = null;
+
+    global $zco_notifier;
+    $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_BEGIN');
 
     // Determine the transaction type
     list($pfOrderId, $zcOrderId, $txnType) = pf_lookupTransaction($pfData);
@@ -193,7 +203,9 @@ if (!$pfError) {
             require(DIR_WS_CLASSES . 'order_total.php');
             $order_total_modules = new order_total();
             pflog(__FILE__ . LINE_LITERAL . __LINE__);
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_BEFORE_ORDER_TOTALS_PROCESS');
             $order_totals = $order_total_modules->process();
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_ORDER_TOTALS_PROCESS');
             //// eof: Get ZenCart order details
             pflog(__FILE__ . LINE_LITERAL . __LINE__);
             //// bof: Check data against ZenCart order
@@ -217,12 +229,20 @@ if (!$pfError) {
 
             // Create ZenCart order
             pflog('Creating Zen Cart order');
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_PAYMENT_MODULES_BEFOREPROCESS');
             $zcOrderId = $order->create($order_totals);
+            if ($_SESSION['is_guest_checkout']) {
+                // Update the order customer and address details
+                updateGuestOrder($zcOrderId, $_SESSION);
+            }
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_ORDER_CREATE');
+
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_PAYMENT_MODULES_AFTER_ORDER_CREATE');
 
             // Create PayFast order
             pflog('Creating PayFast order');
             $sqlArray = pf_createOrderArray($pfData, $zcOrderId, $ts);
-            zen_db_perform(TABLE_PAYFAST, $sqlArray);
+            zen_db_perform(pf_getActiveTable(), $sqlArray);
 
             // Create PayFast history record
             pflog('Creating PayFast payment status history record');
@@ -260,45 +280,18 @@ if (!$pfError) {
             // Add products to order
             pflog('Adding products to order');
             $order->create_add_products($zcOrderId, 2);
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_ORDER_CREATE_ADD_PRODUCTS');
 
-            // Email customer
-            pflog('Emailing customer');
-            $order->send_order_email($zcOrderId, 2);
+            $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_SEND_ORDER_EMAIL');
 
             // Empty cart
             pflog('Emptying cart');
-            $_SESSION['cart']->reset(true);
 
             // Deleting stored session information
             $sql =
                 "DELETE FROM `" . TABLE_PAYFAST_SESSION . "`
                 WHERE `session_id` = '" . $zcSessID . "'";
             $db->Execute($sql);
-
-            // Sending email to admin
-            if (PF_DEBUG) {
-                $subject = "PayFast ITN on your site";
-                $body    =
-                    REGEX_HI_LITERAL .
-                    "A PayFast transaction has been completed on your website\n" .
-                    LONG_LINE_LITERAL .
-                    SITE_LITERAL . STORE_NAME . " (" . HTTP_SERVER . DIR_WS_CATALOG . ")\n" .
-                    ORDER_LITERAL . $zcOrderId . "\n" .
-                    //"User ID: ". $db->f( 'user_id' ) ."\n".
-                    TRANSACTION_LITERAL . $pfData['pf_payment_id'] . "\n" .
-                    PAYMENT_LITERAL . $pfData['payment_status'] . "\n" .
-                    "Order Status Code: " . $newStatus;
-                zen_mail(
-                    STORE_OWNER,
-                    $pfDebugEmail,
-                    $subject,
-                    $body,
-                    STORE_OWNER,
-                    STORE_OWNER_EMAIL_ADDRESS,
-                    null,
-                    'debug'
-                );
-            }
 
             break;
 

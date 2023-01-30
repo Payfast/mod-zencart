@@ -23,6 +23,8 @@ define('TABLE_PAYFAST_SESSION', DB_PREFIX . 'payfast_session');
 define('TABLE_PAYFAST_PAYMENT_STATUS', DB_PREFIX . 'payfast_payment_status');
 define('TABLE_PAYFAST_PAYMENT_STATUS_HISTORY', DB_PREFIX . 'payfast_payment_status_history');
 define('TABLE_PAYFAST_TESTING', DB_PREFIX . 'payfast_testing');
+const TABLE_ORDERS    = DB_PREFIX . 'orders';
+const TABLE_COUNTRIES = DB_PREFIX . 'countries';
 
 // Formatting
 define('PF_FORMAT_DATETIME', 'Y-m-d H:i:s');
@@ -71,7 +73,7 @@ function pf_createUUID()
  */
 function pf_getActiveTable()
 {
-    if (strcasecmp(MODULE_PAYMENT_PAYFAST_SERVER, 'Live') == 0) {
+    if (strcasecmp(MODULE_PAYMENT_PAYFAST_SERVER, 'Live') === 0) {
         $table = TABLE_PAYFAST;
     } else {
         $table = TABLE_PAYFAST_TESTING;
@@ -251,10 +253,10 @@ function pf_updateOrderStatusAndHistory($pfData, $zcOrderId, $txnType, $ts, $new
             WHERE `orders_id` = " . (int)$zcOrderId;
         $checkStatus = $db->Execute($sql);
 
-        $zcMaxDays = date_diff(
-                         $checkStatus->fields['date_purchased'],
-                         date(PF_FORMAT_DATETIME)
-                     ) + (int)DOWNLOAD_MAX_DAYS;
+        $purchaseDate = new DateTime($checkStatus->fields['date_purchased']);
+        $now          = new DateTime();
+        $diff         = $now->diff($purchaseDate, true);
+        $zcMaxDays    = $diff->days + (int)DOWNLOAD_MAX_DAYS;
 
         pflog(
             'Updating order #' . (int)$zcOrderId . ' downloads. New max days: ' .
@@ -307,3 +309,70 @@ function pf_removeExpiredSessions()
     }
 }
 
+function updateGuestOrder(int $orders_id, array $session)
+{
+    global $db;
+
+    $detail    = json_decode($session['guest_detail']);
+    $table     = TABLE_COUNTRIES;
+    $countryId = $detail->zone_country_id->bill;
+    $sql       = "select * from $table where countries_id=$countryId";
+    $rBill         = $db->Execute($sql);
+    $countryId = $detail->zone_country_id->ship;
+    $sql       = "select * from $table where countries_id=$countryId";
+    $rShip         = $db->Execute($sql);
+
+    $firstname               = $detail->firstname->bill;
+    $lastname                = $detail->lastname->bill;
+    $company                 = $detail->company->bill;
+    $email_address           = $detail->email_address;
+    $telephone               = $detail->telephone;
+    $street_address          = $detail->street_address->bill;
+    $suburb                  = $detail->suburb->bill;
+    $city                    = $detail->city->bill;
+    $state                   = $detail->state->bill;
+    $postcode                = $detail->postcode->bill;
+    $country                 = $rBill->fields['countries_name'];
+    $delivery_firstname      = $detail->firstname->ship;
+    $delivery_lastname       = $detail->lastname->ship;
+    $delivery_company        = $detail->company->ship;
+    $delivery_street_address = $detail->street_address->ship;
+    $delivery_suburb         = $detail->suburb->ship;
+    $delivery_city           = $detail->city->ship;
+    $delivery_state          = $detail->state->ship;
+    $delivery_postcode       = $detail->postcode->ship;
+    $delivery_country        = $rShip->fields['countries_name'];
+
+    $table = TABLE_ORDERS;
+    $sql   = <<<SQL
+update $table set
+               customers_name='$firstname $lastname',
+               customers_company='$company',
+               customers_street_address='$street_address',
+               customers_suburb='$suburb',
+               customers_city='$city',
+               customers_postcode='$postcode',
+               customers_state='$state',
+               customers_country='$country',
+               customers_telephone='$telephone',
+               customers_email_address='$email_address',
+               billing_name='$firstname $lastname',
+               billing_company='$company',
+               billing_street_address='$street_address',
+               billing_suburb='$suburb',
+               billing_city='$city',
+               billing_postcode='$postcode',
+               billing_state='$state',
+               billing_country='$country',
+               delivery_name='$delivery_firstname $delivery_lastname',
+               delivery_company='$delivery_company',
+               delivery_street_address='$delivery_street_address',
+               delivery_suburb='$delivery_suburb',
+               delivery_city='$delivery_city',
+               delivery_postcode='$delivery_postcode',
+               delivery_state='$delivery_state',
+               delivery_country='$delivery_country'
+               where orders_id=$orders_id
+SQL;
+    $db->Execute($sql);
+}
