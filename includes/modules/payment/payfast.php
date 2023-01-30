@@ -15,8 +15,8 @@
  */
 
 // Load dependency files
-if (defined('MODULE_PAYMENT_PAYFAST_DEBUG')) {
-    define('PF_DEBUG', (MODULE_PAYMENT_PAYFAST_DEBUG == 'True' ? true : false));
+if (defined('MODULE_PAYMENT_PAYFAST_DEBUG') && !defined("PF_DEBUG")) {
+    define('PF_DEBUG', MODULE_PAYMENT_PAYFAST_DEBUG == 'True');
 }
 // phpcs:disable
 include_once((IS_ADMIN_FLAG === true ? DIR_FS_CATALOG_MODULES : DIR_WS_MODULES) . 'payment/payfast/payfast_common.inc');
@@ -158,7 +158,10 @@ class payfast extends base
             );
 
             while (!$check_query->EOF) {
-                if ($check_query->fields['zone_id'] < 1 || $check_query->fields['zone_id'] == $order->billing['zone_id']) {
+                if (
+                    $check_query->fields['zone_id'] < 1 ||
+                    $check_query->fields['zone_id'] == $order->billing['zone_id']
+                ) {
                     $check_flag = true;
                     break;
                 }
@@ -311,15 +314,6 @@ class payfast extends base
         // patch for multi-currency - AGB 19/07/13 - see also the ITN handler
         $_SESSION['payfast_amount'] = number_format($this->transaction_amount, $currencyDecPlaces, '.', '');
 
-        $sql =
-            self::INSERT_LITERAL . TABLE_PAYFAST_SESSION . "
-                ( session_id, saved_session, expiry )
-            VALUES (
-                '" . zen_db_input(zen_session_id()) . "',
-                '" . base64_encode(serialize($_SESSION)) . "',
-                '" . date(PF_FORMAT_DATETIME_DB, $tsExpire) . "' )";
-        $db->Execute($sql);
-
         // remove amp; before POSTing to PayFast
         $cancelUrl = str_replace("amp;", "", $cancelUrl);
         $returnUrl = str_replace("amp;", "", $returnUrl);
@@ -349,6 +343,17 @@ class payfast extends base
             'custom_str2'      => zen_session_name() . '=' . zen_session_id(),
         );
 
+        $_SESSION['guest_detail'] = json_encode($_POST);
+
+        $sql =
+            self::INSERT_LITERAL . TABLE_PAYFAST_SESSION . "
+                ( session_id, saved_session, expiry )
+            VALUES (
+                '" . zen_db_input(zen_session_id()) . "',
+                '" . base64_encode(serialize($_SESSION)) . "',
+                '" . date(PF_FORMAT_DATETIME_DB, $tsExpire) . "' )";
+        $db->Execute($sql);
+
         $pfOutput = '';
         // Create output string
         foreach ($data as $name => $value) {
@@ -358,7 +363,10 @@ class payfast extends base
         $passPhrase = MODULE_PAYMENT_PAYFAST_PASSPHRASE;
 
         $pfOutput = substr($pfOutput, 0, -1);
-        $pfOutput = $pfOutput . "&passphrase=" . urlencode($passPhrase);
+
+        if (!empty($passPhrase)) {
+            $pfOutput = $pfOutput . "&passphrase=" . urlencode($passPhrase);
+        }
 
         $data['signature'] = md5($pfOutput);
         pflog("Data to send:\n" . print_r($data, true));
@@ -394,11 +402,13 @@ class payfast extends base
         pflog($pre . 'bof');
 
         // Variable initialization
-        global $db, $order_total_modules;
+        global $db, $order_total_modules, $insert_id;
 
         // If page was called correctly with "referer" tag
         if (isset($_GET['referer']) && strcasecmp($_GET['referer'], 'payfast') == 0) {
             $this->notify('NOTIFY_PAYMENT_PAYFAST_RETURN_TO_STORE');
+
+            $this->notify('NOTIFY_CHECKOUT_PROCESS_BEFORE_CART_RESET', $insert_id);
 
             // Reset all session variables
             $_SESSION['cart']->reset(true);
@@ -409,6 +419,8 @@ class payfast extends base
             unset($_SESSION['comments']);
             unset($_SESSION['cot_gv']);
             $order_total_modules->clear_posts();
+
+            $this->notify('NOTIFY_HEADER_END_CHECKOUT_PROCESS');
 
             // Redirect to the checkout success page
             zen_redirect(zen_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));
@@ -461,6 +473,8 @@ class payfast extends base
     {
         $pre = __METHOD__ . ' : ';
         pflog($pre . 'bof');
+
+        $this->notify('NOTIFY_HEADER_START_CHECKOUT_PROCESS');
 
         // Set 'order not created' flag
         $_SESSION['order_created'] = '';

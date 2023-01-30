@@ -214,8 +214,8 @@ require(DIR_WS_INCLUDES . 'header.php'); ?>
                                         <?php
                                         if (zen_not_null($selectedStatus)) {
                                             $sqlSearch = " AND p.status = '" . zen_db_prepare_input(
-                                                    $selectedStatus
-                                                ) . "'";
+                                                $selectedStatus
+                                            ) . "'";
 
                                             if ($selectedStatus !== 'pending' && $selectedStatus !== 'completed') {
                                                 $sql =
@@ -439,8 +439,8 @@ require(DIR_WS_INCLUDES . 'header.php'); ?>
                                                 );
                                                 $contents[] = array(
                                                     'text' => TABLE_HEADING_DATE_ADDED . ': ' . zen_datetime_short(
-                                                            $data->timestamp
-                                                        )
+                                                        $data->timestamp
+                                                    )
                                                 );
                                                 $contents[] = array(
                                                     'text' => TABLE_HEADING_STATUS . ': ' . $data->status
