@@ -1,3 +1,5 @@
+# mod-zencart
+
 PayFast ZenCart Module v1.1.4 for Zen Cart 1.5.8
 -----------------------------------------------------
 Copyright (c) 2023 PayFast (Pty) Ltd
@@ -20,10 +22,4 @@ INTEGRATION:
 - Username: sbtu01@payfast.co.za
 - Password: clientpass
 
-******************************************************************************
-*                                                                            *
-*    Please see the URL below for all information concerning this module:    *
-*                                                                            *
-*                  https://www.payfast.co.za/shopping-carts/zen-cart/        *
-*                                                                            *
-******************************************************************************
+Please [click here](https://payfast.io/integration/shopping-carts/zen-cart/) for more information concerning this module.
